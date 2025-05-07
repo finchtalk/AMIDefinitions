@@ -45,7 +45,7 @@
       "type": "shell",
       "inline": [
           "sudo yum update -y",
-          "sudo yum install -y python3",
+          "sudo yum install -y python3 zip unzip",
           "sudo ln -s /usr/bin/pip3 /usr/bin/pip",
           "sudo pip install ansible==2.7.9"
         ]
