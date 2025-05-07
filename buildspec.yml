@@ -14,7 +14,7 @@ phases:
       - sudo chmod +x /usr/local/bin/packer   # Make sure it's executable
       - export PATH=$PATH:/usr/local/bin      # Ensure /usr/local/bin is in PATH
       - echo "Validating Packer template"
-      - ./packer validate packer_cis.json
+      - /usr/local/bin/packer validate packer_cis.json
   build:
     commands:
       - ./packer build -color=false packer_cis.json | tee build.log
