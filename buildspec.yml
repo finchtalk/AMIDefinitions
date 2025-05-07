@@ -1,5 +1,7 @@
 version: 0.2
-
+env:
+  variables:
+    AWS_REGION: "ap-southeast-1"  # Placeholder, will be set dynamically
 phases:
   pre_build:
     commands:
