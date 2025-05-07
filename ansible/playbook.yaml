@@ -27,6 +27,6 @@
         group_name: "system_logs"
   roles:
     - common
-    - cis_amazon_linux
+   # - cis_amazon_linux
   #  - anthcourtney.cis-amazon-linux
     # - dharrisio.aws-cloudwatch-logs-agent
