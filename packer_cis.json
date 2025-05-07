@@ -51,7 +51,8 @@
         "sudo yum update -y",
         "sudo yum install -y python3 zip unzip",
         "sudo ln -s /usr/bin/pip3 /usr/bin/pip",
-        "sudo pip install ansible==2.7.9"
+        "sudo pip install ansible==2.7.9",
+        "mkdir -p /tmp/packer-provisioner-ansible-local/roles"
       ]
     },
     {
