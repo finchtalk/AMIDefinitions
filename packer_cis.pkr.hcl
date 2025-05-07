@@ -1,90 +1,67 @@
-variable "vpc" {
-  default = "${env("BUILD_VPC_ID")}"
-}
-
-variable "subnet" {
-  default = "${env("BUILD_SUBNET_ID")}"
-}
-
-variable "aws_region" {
-  default = "${env("AWS_REGION")}"
-}
-
 variable "ami_name" {
-  default = "Prod-CIS-Latest-AMZN-${formatdate("2006-01-02 15_04_05", timestamp())}"
+  default = "Prod-CIS-Latest-AMZN-${timestamp()}"
 }
 
-builder "amazon-ebs" {
-  name               = "AWS AMI Builder - CIS"
-  region             = var.aws_region
-  source_ami_filter {
+build {
+  name    = "AWS AMI Builder - CIS"
+  type    = "amazon-ebs"
+
+  region             = var.AWS_REGION
+  source_ami_filter  = {
     filters = {
-      virtualization-type = "hvm"
-      name                = "amzn2-ami-hvm-*-x86_64-gp2"
-      root-device-type    = "ebs"
+      "virtualization-type" = "hvm"
+      "name"                = "amzn2-ami-hvm-*-x86_64-gp2"
+      "root-device-type"    = "ebs"
     }
-    owners = [
-      "137112412989", "591542846629", "801119661308",
-      "102837901569", "013907871322", "206029621532",
-      "286198878708", "443319210888"
-    ]
+    owners = ["137112412989", "591542846629", "801119661308"]
     most_recent = true
   }
-  instance_type               = "t2.micro"
-  ssh_username                = "ec2-user"
-  ami_name                    = var.ami_name
-  tags = {
-    Name = var.ami_name
-  }
-  run_tags = {
-    Name = var.ami_name
-  }
-  run_volume_tags = {
-    Name = var.ami_name
-  }
-  snapshot_tags = {
-    Name = var.ami_name
-  }
-  ami_description            = "Amazon Linux CIS with Cloudwatch Logs agent"
+  instance_type      = "t2.micro"
+  ssh_username       = "ec2-user"
+  ami_name           = var.ami_name
+  ami_description    = "Amazon Linux CIS with Cloudwatch Logs agent"
   associate_public_ip_address = true
-  vpc_id                     = var.vpc
-  subnet_id                  = var.subnet
-}
+  vpc_id             = var.vpc
+  subnet_id          = var.subnet
 
-provisioner "file" {
-  source      = "ansible/playbook.yaml"
-  destination = "/tmp/packer-provisioner-ansible-local/playbook.yaml"
-}
+  provisioner "shell" {
+    inline = [
+      "sudo yum update -y",
+      "sudo yum install -y python3 zip unzip",
+      "sudo ln -s /usr/bin/pip3 /usr/bin/pip",
+      "sudo pip install ansible==2.7.9"
+    ]
+  }
 
-provisioner "file" {
-  source      = "ansible/requirements.yaml"
-  destination = "/tmp/packer-provisioner-ansible-local/requirements.yaml"
-}
+  provisioner "file" {
+    source      = "ansible/playbook.yaml"
+    destination = "/tmp/packer-provisioner-ansible-local/playbook.yaml"
+  }
 
-provisioner "file" {
-  source      = "ansible/roles"
-  destination = "/tmp/packer-provisioner-ansible-local/roles"
-}
+  provisioner "file" {
+    source      = "ansible/requirements.yaml"
+    destination = "/tmp/packer-provisioner-ansible-local/requirements.yaml"
+  }
 
-provisioner "shell" {
-  inline = [
-    "ansible-galaxy install -r /tmp/packer-provisioner-ansible-local/requirements.yaml --force --ignore-errors"
-  ]
-}
+  provisioner "file" {
+    source      = "ansible/roles"
+    destination = "/tmp/packer-provisioner-ansible-local/roles"
+  }
 
-provisioner "ansible-local" {
-  playbook_file   = "/tmp/packer-provisioner-ansible-local/playbook.yaml"
-  playbook_dir    = "/tmp/packer-provisioner-ansible-local"
-  galaxy_file     = "/tmp/packer-provisioner-ansible-local/requirements.yaml"
-  role_paths      = ["/tmp/packer-provisioner-ansible-local/roles/common"]
-  extra_arguments = [
-    "--connection=local",
-    "--inventory=localhost,"
-  ]
-}
+  provisioner "ansible-local" {
+    playbook_file  = "/tmp/packer-provisioner-ansible-local/playbook.yaml"
+    playbook_dir   = "/tmp/packer-provisioner-ansible-local"
+    galaxy_file    = "/tmp/packer-provisioner-ansible-local/requirements.yaml"
+    role_paths     = ["/tmp/packer-provisioner-ansible-local/roles/common"]
+    extra_arguments = [
+      "--connection=local",
+      "--inventory=localhost,"
+    ]
+  }
 
-provisioner "shell" {
-  inline = [
-    "rm .ssh/authorized_keys ; sudo rm /root/.ssh/authorized_keys"
-  ]
+  provisioner "shell" {
+    inline = [
+      "rm .ssh/authorized_keys ; sudo rm /root/.ssh/authorized_keys"
+    ]
+  }
 }
