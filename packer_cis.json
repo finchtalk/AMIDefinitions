@@ -64,7 +64,7 @@
       ],
       "playbook_dir": "ansible",
       "galaxy_file": "ansible/requirements.yaml",
-      "command": "ansible-galaxy install -r requirements.yaml --force",
+      "command": "ansible-galaxy install -r requirements.yaml -force --ignore-errors",
       "extra_arguments": [
         "--connection=local",
         "--inventory=localhost,"
