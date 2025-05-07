@@ -51,24 +51,24 @@
         ]
     },
     {
-      "type": "shell",
-      "inline": [
-        "cd ansible && ansible-galaxy install -r requirements.yaml --force --ignore-errors"
-      ]
-    },
-    {
-      "type": "ansible-local",
-      "playbook_file": "ansible/playbook.yaml",
-      "playbook_dir": "ansible",
-      "galaxy_file": "ansible/requirements.yaml",
-      "role_paths": [
-        "ansible/roles/common"
-      ],
-      "extra_arguments": [
-        "--connection=local",
-        "--inventory=localhost,"
-      ]
-    }, 
+        "type": "shell",
+        "inline": [
+          "ansible-galaxy install -r /tmp/packer-provisioner-ansible-local/requirements.yaml --force --ignore-errors"
+        ]
+      },
+      {
+        "type": "ansible-local",
+        "playbook_file": "/tmp/packer-provisioner-ansible-local/playbook.yaml",
+        "playbook_dir": "/tmp/packer-provisioner-ansible-local",
+        "galaxy_file": "/tmp/packer-provisioner-ansible-local/requirements.yaml",
+        "role_paths": [
+          "/tmp/packer-provisioner-ansible-local/roles/common"
+        ],
+        "extra_arguments": [
+          "--connection=local",
+          "--inventory=localhost,"
+        ]
+      }, 
     {
       "type": "shell",
       "inline": [
