@@ -5,8 +5,13 @@ env:
 phases:
   pre_build:
     commands:
+      - echo "Installing Python and pip"
+      - sudo yum install -y python3 zip unzip
+      - sudo python3 -m ensurepip --upgrade
+      - sudo yum install -y python3-pip  # Install pip3 to make sure it's available
       - echo "Installing Packer"
       - curl -o packer.zip https://releases.hashicorp.com/packer/1.3.3/packer_1.3.3_linux_amd64.zip && unzip packer.zip
+      - sudo mv packer /usr/local/bin/packer  # Ensure Packer is accessible globally
       - echo "Validating Packer template"
       - ./packer validate packer_cis.json
   build:
