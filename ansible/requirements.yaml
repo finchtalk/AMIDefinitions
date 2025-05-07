@@ -1,3 +1,6 @@
 ---
-- src: anthcourtney.cis-amazon-linux
-- src: dharrisio.aws-cloudwatch-logs-agent
+#- src: anthcourtney.cis-amazon-linux
+#- src: dharrisio.aws-cloudwatch-logs-agent
+- src: dennisotugo.cis-amazon-linux-2
+- src: cisagov.cloudwatch-agent
+
