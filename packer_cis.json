@@ -55,14 +55,14 @@
       ]
     },
     {
-      "type": "copy",
-      "sources": [
+      "type": "file",
+      "source": [
         "ansible/playbook.yaml",
         "ansible/requirements.yaml",
-        "ansible/roles/**"
+        "ansible/roles/**/*"
       ],
       "destination": "/tmp/packer-provisioner-ansible-local/"
-    },
+    },    
     {
       "type": "shell",
       "inline": [
