@@ -1,11 +1,10 @@
 variable "ami_name" {
-  default = "Prod-CIS-Latest-AMZN-${formatdate("YYYY-MM-DD_HH-mm-ss", timestamp())}"
+  default = "Prod-CIS-Latest-AMZN-2025-05-07_12-00-00"
 }
 
 build {
   name    = "AWS AMI Builder - CIS"
   type    = "amazon-ebs"
-
   region             = var.AWS_REGION
   source_ami_filter  = {
     filters = {
