@@ -1,5 +1,5 @@
 variable "ami_name" {
-  default = "Prod-CIS-Latest-AMZN-${timestamp()}"
+  default = "Prod-CIS-Latest-AMZN-${formatdate("YYYY-MM-DD_HH-mm-ss", timestamp())}"
 }
 
 build {
