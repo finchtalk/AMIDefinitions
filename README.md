@@ -90,3 +90,13 @@ git push origin master
     - A) You haven't chosen a VPC Public Subnet, and therefore Packer cannot connect to the instance
     - B) There may have been a connectivity issue between Packer and EC2; retrying the build step within AWS CodePipeline should work just fine 
 
+   #   ====================
+   # 
+   #   "type": "ansible-local",
+   #   "playbook_file": "ansible/playbook.yaml",
+   #   "role_paths": [
+   #     "ansible/roles/common"
+   #   ],
+   #   "playbook_dir": "ansible",
+   #  "galaxy_file": "ansible/requirements.yaml"
+   # 
