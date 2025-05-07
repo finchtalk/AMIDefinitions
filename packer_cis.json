@@ -44,8 +44,11 @@
   "provisioners": [{
       "type": "shell",
       "inline": [
-        "sudo pip install ansible==2.7.9"
-      ]
+          "sudo yum update -y",
+          "sudo yum install -y python3",
+          "sudo ln -s /usr/bin/pip3 /usr/bin/pip",
+          "sudo pip install ansible==2.7.9"
+        ]
     },
     {
       "type": "ansible-local",
