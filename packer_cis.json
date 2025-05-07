@@ -60,8 +60,7 @@
       "type": "ansible-local",
       "playbook_file": "ansible/playbook.yaml",
       "role_paths": [
-        "ansible/roles/common",
-        "/tmp/packer-provisioner-ansible-local/roles"
+        "ansible/roles/common"
       ],
       "playbook_dir": "ansible",
       "galaxy_file": "ansible/requirements.yaml",
