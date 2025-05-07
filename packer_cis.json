@@ -3,85 +3,72 @@
     "vpc": "{{env `BUILD_VPC_ID`}}",
     "subnet": "{{env `BUILD_SUBNET_ID`}}",
     "aws_region": "{{env `AWS_REGION`}}",
-    "ami_name": "Prod-CIS-Latest-AMZN-{{isotime \"2006-01-02 15_04_05\"}}"
+    "ami_name": "Prod-CIS-Latest-AMZN-{{isotime \"02-Jan-06 03_04_05\"}}"
   },
-  "builders": [
+  "builders": [{
+    "name": "AWS AMI Builder - CIS",
+    "type": "amazon-ebs",
+    "region": "{{user `aws_region`}}",
+    "source_ami_filter": {
+      "filters": {
+        "virtualization-type": "hvm",
+        "name": "amzn2-ami-hvm-*-x86_64-gp2",
+        "root-device-type": "ebs"
+      },
+      "owners": ["137112412989", "591542846629", "801119661308",
+        "102837901569", "013907871322", "206029621532",
+        "286198878708", "443319210888"
+      ],
+      "most_recent": true
+    },
+    "instance_type": "t2.micro",
+    "ssh_username": "ec2-user",
+    "ami_name": "{{user `ami_name` | clean_ami_name}}",
+    "tags": {
+      "Name": "{{user `ami_name`}}"
+    },
+    "run_tags": {
+      "Name": "{{user `ami_name`}}"
+    },
+    "run_volume_tags": {
+      "Name": "{{user `ami_name`}}"
+    },
+    "snapshot_tags": {
+      "Name": "{{user `ami_name`}}"
+    },
+    "ami_description": "Amazon Linux CIS with Cloudwatch Logs agent",
+    "associate_public_ip_address": "true",
+    "vpc_id": "{{user `vpc`}}",
+    "subnet_id": "{{user `subnet`}}"
+  }],
+  "provisioners": [{
+      "type": "shell",
+      "inline": [
+          "sudo yum update -y",
+          "sudo yum install -y python3 zip unzip",
+          "sudo ln -s /usr/bin/pip3 /usr/bin/pip",
+          "sudo pip install ansible==2.7.9"
+        ]
+    },
     {
-      "name": "AWS AMI Builder - CIS",
-      "type": "amazon-ebs",
-      "region": "{{user `aws_region`}}",
-      "source_ami_filter": {
-        "filters": {
-          "virtualization-type": "hvm",
-          "name": "amzn2-ami-hvm-*-x86_64-gp2",
-          "root-device-type": "ebs"
-        },
-        "owners": [
-          "137112412989", "591542846629", "801119661308",
-          "102837901569", "013907871322", "206029621532",
-          "286198878708", "443319210888"
+        "type": "shell",
+        "inline": [
+          "ansible-galaxy install -r /tmp/packer-provisioner-ansible-local/requirements.yaml --force --ignore-errors"
+        ]
+      },
+      {
+        "type": "ansible-local",
+        "playbook_file": "/tmp/packer-provisioner-ansible-local/playbook.yaml",
+        "playbook_dir": "/tmp/packer-provisioner-ansible-local",
+        "galaxy_file": "/tmp/packer-provisioner-ansible-local/requirements.yaml",
+        "role_paths": [
+          "/tmp/packer-provisioner-ansible-local/roles/common"
         ],
-        "most_recent": true
-      },
-      "instance_type": "t2.micro",
-      "ssh_username": "ec2-user",
-      "ami_name": "{{user `ami_name` | clean_ami_name}}",
-      "tags": {
-        "Name": "{{user `ami_name`}}"
-      },
-      "run_tags": {
-        "Name": "{{user `ami_name`}}"
-      },
-      "run_volume_tags": {
-        "Name": "{{user `ami_name`}}"
-      },
-      "snapshot_tags": {
-        "Name": "{{user `ami_name`}}"
-      },
-      "ami_description": "Amazon Linux CIS with Cloudwatch Logs agent",
-      "associate_public_ip_address": true,
-      "vpc_id": "{{user `vpc`}}",
-      "subnet_id": "{{user `subnet`}}"
-    }
-  ],
-  "provisioners": [
-    {
-      "type": "shell",
-      "inline": [
-        "sudo yum update -y",
-        "sudo yum install -y python3 zip unzip",
-        "sudo ln -s /usr/bin/pip3 /usr/bin/pip",
-        "sudo pip install ansible==2.7.9"
-      ]
-    },
-    {
-      "type": "copy",
-      "sources": [
-        "ansible/playbook.yaml",
-        "ansible/requirements.yaml",
-        "ansible/roles/**"
-      ],
-      "destination": "/tmp/packer-provisioner-ansible-local/"
-    },
-    {
-      "type": "shell",
-      "inline": [
-        "ansible-galaxy install -r /tmp/packer-provisioner-ansible-local/requirements.yaml --force"
-      ]
-    },
-    {
-      "type": "ansible-local",
-      "playbook_file": "/tmp/packer-provisioner-ansible-local/playbook.yaml",
-      "playbook_dir": "/tmp/packer-provisioner-ansible-local",
-      "galaxy_file": "/tmp/packer-provisioner-ansible-local/requirements.yaml",
-      "role_paths": [
-        "/tmp/packer-provisioner-ansible-local/roles/common"
-      ],
-      "extra_arguments": [
-        "--connection=local",
-        "--inventory=localhost,"
-      ]
-    },
+        "extra_arguments": [
+          "--connection=local",
+          "--inventory=localhost,"
+        ]
+      }, 
     {
       "type": "shell",
       "inline": [
