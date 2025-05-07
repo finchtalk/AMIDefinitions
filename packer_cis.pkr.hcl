@@ -2,10 +2,9 @@ variable "ami_name" {
   default = "Prod-CIS-Latest-AMZN-2025-05-07_12-00-00"
 }
 
-build {
-  name    = "AWS AMI Builder - CIS"
-  type    = "amazon-ebs"
+source "amazon-ebs" "cis_ami" {
   region             = var.AWS_REGION
+  instance_type      = "t2.micro"
   source_ami_filter  = {
     filters = {
       "virtualization-type" = "hvm"
@@ -15,13 +14,18 @@ build {
     owners = ["137112412989", "591542846629", "801119661308"]
     most_recent = true
   }
-  instance_type      = "t2.micro"
-  ssh_username       = "ec2-user"
   ami_name           = var.ami_name
   ami_description    = "Amazon Linux CIS with Cloudwatch Logs agent"
+  ssh_username       = "ec2-user"
   associate_public_ip_address = true
   vpc_id             = var.vpc
   subnet_id          = var.subnet
+}
+
+build {
+  sources = [
+    "source.amazon-ebs.cis_ami"
+  ]
 
   provisioner "shell" {
     inline = [
