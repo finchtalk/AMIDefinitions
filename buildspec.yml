@@ -14,10 +14,10 @@ phases:
       - sudo chmod +x /usr/local/bin/packer   # Make sure it's executable
       - export PATH=$PATH:/usr/local/bin      # Ensure /usr/local/bin is in PATH
       - echo "Validating Packer template"
+      - /usr/local/bin/packer init packer_cis.pkr.hcl
       - /usr/local/bin/packer validate packer_cis.pkr.hcl
   build:
     commands:
-      - /usr/local/bin/packer init packer_cis.pkr.hcl
       - /usr/local/bin/packer build -color=false packer_cis.pkr.hcl | tee build.log
   post_build:
     commands:
