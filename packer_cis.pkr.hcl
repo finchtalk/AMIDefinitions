@@ -75,4 +75,22 @@ provisioner "shell" {
       "sudo ansible-playbook /home/ec2-user/ansible/playbook.yaml -i localhost, -c local"
     ]
   }
+  # Install Trivy and scan the instance
+  provisioner "shell" {
+    inline = [
+      "echo 'Installing Trivy...'",
+      "wget -qO- https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.49.1_Linux-64bit.tar.gz | tar xz -C /usr/local/bin",
+      "chmod +x /usr/local/bin/trivy",
+      "echo 'Running Trivy image scan on base OS packages...'",
+      "trivy rootfs --severity CRITICAL,HIGH,MEDIUM --format table --output /home/ec2-user/trivy_scan_report.txt /",
+      "echo 'Trivy scan completed.'"
+    ]
+  }
+
+  # Download the Trivy scan report to local machine
+  provisioner "file" {
+    direction   = "download"
+    source      = "/home/ec2-user/trivy_scan_report.txt"
+    destination = "./trivy_scan_report.txt"
+  }
 }
