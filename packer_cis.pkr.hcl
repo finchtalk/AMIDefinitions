@@ -1,68 +1,78 @@
-variable "ami_name" {
-  default = "Prod-CIS-Latest-AMZN-2025-05-07_12-00-00"
+variable "aws_region" {
+  default = "ap-southeast-1"
 }
 
-variable "AWS_REGION" {
-  default = "ap-southeast-1"  # Update to your region
+variable "ami_name" {
+  default = "cis-hardened-ami"
 }
 
 source "amazon-ebs" "cis_ami" {
-  region                   = var.AWS_REGION
-  instance_type            = "t2.micro"
-  ami_name                 = var.ami_name
-  ami_description          = "Amazon Linux CIS with Cloudwatch Logs agent"
-  ssh_username             = "ec2-user"
-  associate_public_ip_address = true
-
+  region                  = var.aws_region
+  instance_type           = "t2.micro"
   source_ami_filter {
     filters = {
-      "virtualization-type" = "hvm"
-      "name"                = "amzn2-ami-hvm-*-x86_64-gp2"
-      "root-device-type"    = "ebs"
+      name                = "amzn2-ami-hvm-*-x86_64-gp2"
+      virtualization-type = "hvm"
+      root-device-type    = "ebs"
     }
-    owners      = ["137112412989", "591542846629", "801119661308"]
     most_recent = true
+    owners      = ["137112412989"]
+  }
+  ssh_username            = "ec2-user"
+  ami_name                = "${var.ami_name}-${formatdate("20060102-150409", timestamp())}"
+  # Adding tags to the AMI
+  tags = {
+    Name = "${var.ami_name}-${formatdate("20060102-150409", timestamp())}"
+    name = "${var.ami_name}-${formatdate("20060102-150409", timestamp())}"
   }
 }
 
 build {
+  name    = "cis_build"
   sources = [
     "source.amazon-ebs.cis_ami"
   ]
 
-  provisioner "shell" {
-    inline = [
-      "sudo yum update -y",
-      "sudo yum install -y python3 zip unzip",
-      "sudo ln -s /usr/bin/pip3 /usr/bin/pip",
-      "sudo pip install ansible==2.7.9"
-    ]
-  }
+provisioner "shell" {
+  inline = [
+    "mkdir -p /home/ec2-user/ansible/roles", 
+    "chmod -R 777 /home/ec2-user/ansible/roles",
+    "sudo amazon-linux-extras enable ansible2",
+    "sudo yum update -y",  # Ensure the system is up-to-date
+    # Install basic utilities, retrying if yum is locked
+    "for i in {1..5}; do",
+    "  sudo yum install -y zip unzip git gcc make python3-pip python3-devel dnf && break || echo 'yum is locked, retrying...';",
+    "  sleep 10;",
+    "done",
+    "sudo amazon-linux-extras enable python3.8",
+    "sudo yum install -y ansible",
+    "echo 'Installation completed!'",
+    "ansible --version"
+  ]
+}
+
 
   provisioner "file" {
     source      = "ansible/playbook.yaml"
-    destination = "/tmp/packer-provisioner-ansible/playbook.yaml"
+    destination = "/home/ec2-user/ansible/playbook.yaml"
   }
 
   provisioner "file" {
-    source      = "ansible/requirements.yaml"
-    destination = "/tmp/packer-provisioner-ansible/requirements.yaml"
+    source      = "ansible/roles/"
+    destination = "/home/ec2-user/ansible/roles"
   }
 
   provisioner "file" {
-    source      = "ansible/roles"
-    destination = "/tmp/packer-provisioner-ansible/roles"
-  }
-
-  provisioner "shell-local" {
-    inline = [
-      "ansible-playbook /tmp/packer-provisioner-ansible/playbook.yaml"
-    ]
+    source      = "ansible/ansible.cfg"
+    destination = "/home/ec2-user/ansible.cfg"
   }
 
   provisioner "shell" {
     inline = [
-      "rm .ssh/authorized_keys ; sudo rm /root/.ssh/authorized_keys"
+      "sudo chmod -R 755 /home/ec2-user/ansible.cfg",
+      "ls -ltrh /home/ec2-user/ansible/roles",
+      "export ANSIBLE_CONFIG=/home/ec2-user/ansible.cfg",
+      "sudo ansible-playbook /home/ec2-user/ansible/playbook.yaml -i localhost, -c local"
     ]
   }
 }

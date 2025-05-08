@@ -1,6 +1,6 @@
 ---
 #- src: anthcourtney.cis-amazon-linux
 #- src: dharrisio.aws-cloudwatch-logs-agent
-- src:  anthcourtney.cis-amazon-linux
-- src: cisagov.cloudwatch-agent
+- src:  alexandre_io.ansible_role_cis_amazon_linux
+#- src: cisagov.cloudwatch-agent
 
